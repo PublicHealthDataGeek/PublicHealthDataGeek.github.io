@@ -1,5 +1,5 @@
-About me
---------
+
+
 
 I am studying for a PhD in Data Analytics and Society at the University of Leeds in the [Leeds Institute of Data Analytics](https://lida.leeds.ac.uk/).  The Economic and Social Research Council has funded the [Data Analytics and Society Centre for Doctoral Training](https://lida.leeds.ac.uk/study-training/datacdt/) with the Universities of Leeds, Sheffield, Manchester and Liverpool. It brings together social science with computing, mathematics and natural sciences.  My four year integrated PhD and MSc one of 56 currently being undertaken within the Centre.     
 
