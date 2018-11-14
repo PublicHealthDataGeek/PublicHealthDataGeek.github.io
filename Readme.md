@@ -6,9 +6,9 @@ This simulation shows a flock of sheep eating grass in a field.  They eat, move 
 ###Getting started
 ####Installing
 Download the following files into a directory:
-- SheepABMFinal.py
-- agentframework.py
-- in.txt
+- SheepABMFinal.py (aka 'Model')
+- agentframework.py (aka 'The Sheep')
+- in.txt (aka 'Dataset')
 
 These are the model, agents (sheep) and the data file for the environment respectively.  
 
@@ -23,3 +23,4 @@ Spyder 3.3.1 IDE running Python 3.7.0
 Caroline Tait
 
 ####License
+This project is licensed under the MIT License - see the [LICENSE.txt](/docs/LICENSE.txt) file for details.
