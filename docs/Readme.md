@@ -23,4 +23,4 @@ Spyder 3.3.1 IDE running Python 3.7.0
 Caroline Tait
 
 #### License
-This project is licensed under the MIT License - see the [LICENSE.txt](/docs/LICENSE.txt) file for details.
+This project is licensed under the MIT License - see the [LICENSE](/docs/LICENSE) file for details.
