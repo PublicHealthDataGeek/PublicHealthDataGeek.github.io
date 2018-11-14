@@ -9,11 +9,11 @@ Prior to starting the PhD I was in the middle of training to be a [Consultant in
 My PhD
 ------
 My PhD will involve looking at the impact of investment in cycling infrastructure on the normalisation of cycling in London. My main supervisor is [Dr Roger Beecham](https://www.geog.leeds.ac.uk/people/r.beecham).  This is of particular interest to me as it involves cycling (my passion), big data and addressing issues of great public health importance including:
-- air pollution
-- climate change
-- health consequences of obesity and lack of exercise such as cancer, diabetes, heart disease etc
-- wellbeing
-- road safety
+  - air pollution
+  - climate change
+  - health consequences of obesity and lack of exercise such as cancer, diabetes, heart disease etc
+  - wellbeing
+  - road safety
 
 
 My Current Projects
