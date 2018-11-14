@@ -1,7 +1,7 @@
 About me
 --------
 
-I am studying for a PhD in Data Analytics in Society at the University of Leeds in the [Leeds Institute of Data Analytics] (https://lida.leeds.ac.uk/study-training/datacdt/).
+I am studying for a PhD in Data Analytics in Society at the University of Leeds in the [Leeds Institute of Data Analytics(https://lida.leeds.ac.uk/study-training/datacdt/).
 
 I am doing this as part of my training to be a [Consultant in Public Health](https://www.healthcareers.nhs.uk/explore-roles/public-health/roles-public-health/public-health-consultants-and-specialists).
 
