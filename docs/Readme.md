@@ -3,8 +3,8 @@
 
 This simulation shows a flock of sheep eating grass in a field.  They eat, move and share the grass with other members of the flock.  The default parameters are 20 sheep that move and eat 40 times.  It was produced for a module on MSc in Data Analytics course at the University of Leeds. 
 
-### Getting started
-#### Installing
+#### Getting started
+
 Download the following files into a directory:
 - SheepABMFinal.py (aka 'Model')
 - agentframework.py (aka 'The Sheep')
