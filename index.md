@@ -20,7 +20,7 @@ My Current Projects
 -------------------
 My current projects are associated with the modules I am doing in the Masters in Data Analytics.  
 
-###Programming for the Social Sciences.  
+### Programming for the Social Sciences.  
 Assessment 1 involved learning about and coding an Agent Based Model of a flock of sheep nibbling grass in a field.  
 
 
