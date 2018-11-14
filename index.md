@@ -25,8 +25,8 @@ My current projects are associated with the modules I am doing in the Masters in
 ### 1. Programming for the Social Sciences.  
 Assessment 1 involved learning about and coding an Agent Based Model of a flock of sheep nibbling grass in a field.  
 Please download the ReadMe for instructions on how to run this simulation
-[Read Me](docs/readme
-[Simulation](/docs/SheepABMFinal.py)
-[Sheep](/docs/agentframework.py)
-[Dataset](/docs/in.txt)
+- [Read Me](docs/readme.md)
+- [Model](/docs/SheepABMFinal.py)
+- [The Sheep](/docs/agentframework.py)
+- [Dataset](/docs/in.txt)
 
