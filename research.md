@@ -1,3 +1,11 @@
+Research
+
+My Current Projects
+-------------------
+My current projects are associated with the modules I am doing in the Masters in Data Analytics.  
+ ### 1. Programming for the Social Sciences.  
+Assessment 1 involved learning about and coding an Agent Based Model of a flock of sheep nibbling grass in a field.  
+
 ## Sheep eating grass
 ------------------
 
@@ -6,9 +14,9 @@ This simulation shows a flock of sheep eating grass in a field.  They eat, move 
 #### Getting started
 
 Download the following files into a directory:
-- SheepABMFinal.py (aka 'Model')
-- agentframework.py (aka 'The Sheep')
-- in.txt (aka 'Dataset')
+- [Model](/docs/SheepABMFinal.py)
+- [The Sheep](/docs/agentframework.py)
+- [Dataset](/docs/in.txt)
 
 These are the model, agents (sheep) and the data file for the environment respectively.  
 
@@ -24,3 +32,12 @@ Caroline Tait
 
 #### License
 This project is licensed under the MIT License - see the [LICENSE](/docs/LICENSE) file for details.
+
+
+
+Please download the ReadMe for instructions on how to run this simulation
+- [Read Me](https://github.com/PublicHealthDataGeek/PublicHealthDataGeek.github.io/blob/master/Readme.md)
+- [Model](/docs/SheepABMFinal.py)
+- [The Sheep](/docs/agentframework.py)
+- [Dataset](/docs/in.txt)
+
