@@ -15,17 +15,4 @@ My PhD will involve looking at the impact of investment in cycling infrastructur
 
 My research page: [research](research.md)
 
-My Current Projects
--------------------
-My current projects are associated with the modules I am doing in the Masters in Data Analytics.  
-
-### 1. Programming for the Social Sciences.  
-Assessment 1 involved learning about and coding an Agent Based Model of a flock of sheep nibbling grass in a field.  Please download the ReadMe for instructions on how to run this simulation
-- [Read Me](https://github.com/PublicHealthDataGeek/PublicHealthDataGeek.github.io/blob/master/Readme.md)
-- [Model](/docs/SheepABMFinal.py)
-- [The Sheep](/docs/agentframework.py)
-- [Dataset](/docs/in.txt)
-
-
-
-Last updated: 14th November 2018
+Last updated: 26th November 2018
