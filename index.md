@@ -13,6 +13,6 @@ My PhD will involve looking at the impact of investment in cycling infrastructur
   - wellbeing
   - road safety
 
-Details of my research and current projects can be found [here](research.md)
+Details of my research and current projects can be found [here](research.md).
 
 Last updated: 26th November 2018
