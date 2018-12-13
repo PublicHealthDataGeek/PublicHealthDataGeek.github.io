@@ -35,12 +35,12 @@ You can alter the number of sheep by changing the `num_of_agents` and alter how 
 
 ### The Black Death
 ------------------
-This program imports and reads data on average rats caught and population density.  An equation is used to calculate the average number of human deaths from the Black Death and its outputs are saved to file.  Images of the data are generated and displayed.  
+This program imports and reads data on average rats caught and population density.  An equation is used to calculate the average number of human deaths from the Black Death and its outputs are saved to file.  Images of the data are generated and displayed. A Graphical User Interface allows the user to alter the parameters of the equation.   
 
 #### Getting started
 Download the following files into a directory:
- - [The Rats Caught Datafile](/docs/SheepABMFinal.py)
- - [The Population Density Datafile](/docs/agentframework.py)
+ - [The Rats Caught Datafile](/docs/deaths.rats.txt)
+ - [The Population Density Datafile](/docs/deaths.parishes.txt)
  - [The Jupyter notebook](/docs/in.txt)
 
 These are the datafiles and Jupyter notebook than enables you to run the program.  Open the Jupyter notebook and follow the instructions within it to run the code.  
