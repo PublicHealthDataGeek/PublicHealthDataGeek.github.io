@@ -39,8 +39,8 @@ This program imports and reads data on average rats caught and population densit
 
 #### Getting started
 Download the following files into a directory:
- - [The Rats Caught Datafile](/docs/deaths.rats.txt)
- - [The Population Density Datafile](/docs/deaths.parishes.txt)
+ - [The Rats Caught Datafile](/docs/deathsrats.txt)
+ - [The Population Density Datafile](/docs/deathsparishes.txt)
  - [The Jupyter notebook](/docs/)
 
 These are the datafiles and Jupyter notebook than enables you to run the program.  Open the Jupyter notebook and follow the instructions within it to run the code.  
