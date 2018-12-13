@@ -41,16 +41,16 @@ This program imports and reads data on average rats caught and population densit
 Download the following files into a directory:
  - [The Rats Caught Datafile](/docs/deaths.rats.txt)
  - [The Population Density Datafile](/docs/deaths.parishes.txt)
- - [The Jupyter notebook](/docs/in.txt)
+ - [The Jupyter notebook](/docs/)
 
 These are the datafiles and Jupyter notebook than enables you to run the program.  Open the Jupyter notebook and follow the instructions within it to run the code.  
 
 Should you wish to run it from a Python file then please download this file:  
 
-- [Python code]()
+- [Python code](/docs/P4SSAss2Final.py)
 
 #### Built with
- Spyder 3.3.1 IDE running Python 3.7.0 and Jupyter Notebook V???????
+ Spyder 3.3.1 IDE running Python 3.7.0 and Jupyter Notebook (python36).
 
 #### Author
  Caroline Tait
