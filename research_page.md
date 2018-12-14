@@ -1,18 +1,16 @@
-My current projects are associated with the modules I am doing in the Masters in Data Analytics and Society. 
+My current projects are associated with the modules I am doing in the Masters in Data Analytics and Society at the University of Leeds. 
 
 
 
 ## 1. Programming for the Social Sciences.  
-Assessment 1 involved learning about and coding an Agent Based Model of a flock of sheep nibbling grass in a field. 
-
-Assessment 2 required me to build a program that reads in some data, processes it in some way, displays the results and writse the results to file.  I utilised an example project - The Black Death. 
-
+This module introduced computer programming in Python and use of Jupyter Notebook.  This was my first experiece of computer programming.  
+The first assessment involved learning about and coding Agent Based Models.  The example used is a flock of sheep nibbling grass in a field. The second assessment required me to build a program that reads in some data, processes it in some way, displays the results and writse the results to file.  I utilised an example project that looked at the epidemiology of The Black Death. 
 
 
-### Sheep eating grass
+
+### Assessment 1: Sheep eating grass
 ------------------
-
-This simulation shows a flock of sheep eating grass in a field.  They eat, move and share the grass with other members of the flock.  The default parameters are 20 sheep that move and eat 40 times.  
+This simulation is an Agent Based Model that shows a flock of sheep eating grass in a field.  They eat, move and share the grass with other members of the flock.  The default parameters are 20 sheep that move and eat 40 times.  
 
 #### Getting started
 Download the following files into a directory:
@@ -33,7 +31,8 @@ You can alter the number of sheep by changing the `num_of_agents` and alter how 
  This project is licensed under the MIT License - see the [LICENSE](/docs/LICENSE) file for details.
 
 
-### The Black Death
+
+### Assessment 2: The Black Death
 ------------------
 This program imports and reads data on average rats caught and population density.  An equation is used to calculate the average number of human deaths from the Black Death and its outputs are saved to file.  Images of the data are generated and displayed. A Graphical User Interface allows the user to alter the parameters of the equation.   
 
