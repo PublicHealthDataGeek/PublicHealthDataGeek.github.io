@@ -41,7 +41,7 @@ Download the following files into a new directory:
  - [The Black Death Jupyter notebook](/docs/P4SS Ass2 Final Jupy.ipynb)
 
 Go to the below webpage and download the death.rats.txt and death.parishes.txt files and put them in the folder with the Jupyter notebook:
-http://www.geog.leeds.ac.uk/courses/computing/study/core-python-phd/assessment2/death.html
+[Black Death Project](http://www.geog.leeds.ac.uk/courses/computing/study/core-python-phd/assessment2/death.html)
 
 These are the datafiles and Jupyter notebook than enables you to run the program.  Open the Jupyter notebook and follow the instructions within it to run the code.  
 
