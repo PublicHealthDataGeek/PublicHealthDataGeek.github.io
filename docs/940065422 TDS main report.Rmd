@@ -1,0 +1,644 @@
+---
+title: "TRAN5340M Transport Data Science assignment"
+author: '940065422'
+date: "4 May 2019"
+output:
+  html_document: default
+  pdf_document: default
+  word_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+This portfolio is divided into three sections.  Each section uses a different type of data to try and understand cycling issues in London.  
+
+
+### Section 1: What is the relationship between official and crowd-sourced maps of cycling infrastructure?  
+
+Considerable investment has been made in cycling infrastructure in London.  Two particular initiatives, the Cycle Superhighways routes that provide protected space for cycling on busy roads and Quietways that are continuous routes on less busy roads, are the flagships of the built cycling infrastructure of Transport for London (TFL).  They have distinctive roadmarkings, signposting and marketing on websites.   In this section, I will compare data provided by TFL [^1] and compare it to that provided by Open Street Map (OSM) [^2] to see whether the official data matches that collected by a commuity of mappers.  I will utilise the R package `osmdata`[^3].  
+```{r, message=FALSE}
+# Install relevent libraries
+library(tidyverse)
+library(sf)
+library(osmdata)
+library(mapview)
+library(geojsonsf)
+```
+#### Obtaining the spatial data
+
+I will query online datasets to obtain the spatial data.  
+  
+```{r}
+# Get boundary box for Greater London
+GLxy = getbb("greater london")
+
+# Obtain TFL CycleSuperhighway and Quietways data
+urlCSH = "https://cycling.data.tfl.gov.uk/CycleRoutes/Cycle_Superhighways.json"
+TFL_CSH = geojson_sf(urlCSH)
+
+urlQuiet = "https://cycling.data.tfl.gov.uk/CycleRoutes/Quietways.json"
+TFL_Quiet = geojson_sf(urlQuiet)
+```
+
+The London Cycle Network [^4], an OSM Project that map's London's Cycling Network, indicates that OSM entries for Cycle Superhighways are tagged as `cycle_network=UK:London Cycleways` whilst Quietways are tagged by `cycle_network=UK:London Quietways`.  Therefore, these keys and values will be used to query OSM. 
+
+```{r}
+# Obtain OSM CycleSuperhighway and Quietways data 
+OSM_CSH = opq(bbox = GLxy) %>%
+  add_osm_feature(key = "cycle_network", value = "UK:London Cycleways") %>%
+  osmdata_sf()
+
+OSM_Quiet = opq(bbox = GLxy) %>%
+  add_osm_feature(key = "cycle_network", value = "UK:London Quietways") %>%
+  osmdata_sf()
+```
+#### Visualising the data
+  
+  
+The below code creates interactive maps.  However, they are too large in size to be included in this R Markdown document.  All the interactive maps can be displayed by running the separate interactive R file ('940065422 Interactive map code').   
+
+In this document I have included screenshots of the interactive maps.  
+
+```{r, eval=FALSE}
+# Map and display Cyclesuperhighways data
+m1 = mapview(TFL_CSH$geometry, color = 'red')
+m2 = mapview(OSM_CSH$osm_lines, color = 'blue', legend = FALSE)
+sync(m1, m2)
+```
+```{r, eval=FALSE}
+# Map and display Quietways data
+m3 = mapview(TFL_Quiet$geometry, color = 'red')
+m4 = mapview(OSM_Quiet$osm_line, color = 'blue', legend = FALSE)
+sync(m3,m4)
+```
+
+The below figure compares the official TFL data (left panels, red lines) to OSM community-collected data (right panels, blue lines) for Cycle Superhighways (upper panels) and Quietways (lower panels).  
+![](/Users/caroline/Documents/PhD/Transport data science/Figure1.png)
+
+#### Comments  
+
+There appears to be considerably more data in the OSM dataset.  There are multiple possible explanations for the divergence between the two datasources.  One explanation could be that there are 'proposed' routes included in both datasets.  For example:  
+
+```{r}
+TFL_CSH %>%
+  count(Status)
+```
+This shows that 7 Cycle Superhighways are existing whereas another 6 are proposed.  The dataset was last modified in June 2018.  Looking at the TFL website, it is clear that some of the proposed routes are still under consultation and one has been abandoned due to legal action by a local council [^5]. 
+
+```{r}
+OSM_CSH$osm_lines %>%
+  count(rcn)
+```
+Similarly 18% of OSM data is coded as 'proposed' whereas the rest are coded as 'NA'.  
+
+In a similar vein, there could be issues with the timeliness of the data.  It has already been established that the TFL datasets were last updated in June 2018 and although the OSM version is time stamped for early April, it is unclear how recently the various sections have been edited by the OSM community.  
+
+Another explanation is that users include cycling infrastructure that is labelled as some other form of infrastructure by TFL (for example, the mini-Holland projects).   The figure below (a screenshot of the interactive maps created by the below code) shows the OSM Quietways (left panel, blue lines) with the TFL Central London grid (left middle panel, green lines), TFL Mini-Hollands (right middle panel, orange lines) and the TFL Quietways (right pane, red lines).  The TFL Mini-Holland programme is being implemented in three boroughs (Enfield, Kingston and Waltham Forest) and contain multiple features to increase cycling safety and convenience [^6] whilst the Central London grid is a network of connected routes across central London that include Quietways and Cycle Superhighways [^7].  This comparative visualisation appears to show that this labelling does appear to account for some of the difference.  
+
+```{r, eval=FALSE}
+# Obtain TFL MiniHolland data
+urlMH = "https://cycling.data.tfl.gov.uk/CycleRoutes/Mini_Hollands.json"
+TFL_MH = geojson_sf(urlMH)
+urlCLG = "https://cycling.data.tfl.gov.uk/CycleRoutes/Central_London_Grid.json"
+TFL_CLG = geojson_sf(urlCLG)
+m5 = mapview(TFL_MH$geometry, color = 'orange')
+m6 = mapview(TFL_CLG$geometry, color = 'green')
+sync(list(m4,m6,m3,m5), ncol = 4)
+```
+  
+![](/Users/caroline/Documents/PhD/Transport data science/Figure2.png)
+
+  
+Alternatively, OSM could include infrastructure that is built by local borough councils and not by TFL as TFL is only responsible for roads that are 'red routes' (part of the TRL Road Network) that make up 5% of roads in the capital [^8].  Unfortunately, this is harder to identify.  For example, examination of Camden Council's data store revealed no datasets that described their cycling infrastructure [^9].  
+  
+#### Conclusion  
+
+There is considerable divergence between the official and OSM data.  Whilst both datasets are useful, each has limitations.  From a cyclist perspective, the OSM data appears to be more useful as it is more comprehensive and may include additional useful information such as photographs and description of the route.  The planned rebranded of the TFL cycling infrastructure may ease issues with the labelling of cycling infrastructure whilst the imminent, open source, TFL Cycling Infrastructure Database will enable greater accuracy of existing and new routes by providing detailed information of the infrastructure (similar to OSM) for TFL and Borough Council information [^10].
+
+
+### Section 2: What is the relationship between car driver and cyclist casualty socio-economic status for crashes that occured in London in 2017?
+
+In the UK, road accidents where one or more people are injured and that are reported to the Police are collected into a dataset called STATS19. These datasets are published by the Department of Transport to improve road safety, generate statistics, guide police activity and for research [^11], [^12].  Multiple data is collected on the accident, vehicles involved and the casualties.  `stats19` is an R package that downloads and formats STATS19 data thus facilitating analysis and reducing data processing errors [^13].  Initial examination of STATS19 data found that there appeared to be a considerable social gradient to the cyclist casualties with higher socio-economic deprivation being associated with a higher number of casualties.  Such social patterning is seen for many diseases and represent 'avoidable inequalities in health between groups of people within countries'.  These health inequalites are due to inequalities and inequities in the social and economic conditions that impact people and that influence their risk of illhealth, the ability to prevent their illhealth or the treament of that illhealth [^14].
+
+In this section I will examine the 2017 STATS19 data to see if this social gradient exists in the London cyclist casualty data.  Furthermore, I will then obtain the socio-economic status for crashes where the other party was a car driver to examine the driver socio-economic status to see if there is any relationship between the casualty and driver status.  The English Index of Multiple Deprivation decile score, a composite index of multiple measures of deprivation that divides the population into deciles of relative socioeconomic status, will be used as a measure of socio-economic status [^15].  
+
+```{r, message=FALSE, warning=FALSE}
+# Load the packages
+library(stats19)
+library(sf)
+library(tidyverse)
+```
+#### Importing the data and joining the datasets
+
+The `stats19` package has a `get_stats19` function that downloads and formats the STATS19 datasets.  I will use this function to obtain the STATS19 datasets.  
+
+```{r, message=FALSE, warning=FALSE}
+# Import the STATS19 datasets for the year 2017
+crashes_17 = get_stats19(year = 2017, type = "Accidents", ask = FALSE)
+vehicles_17 = get_stats19(year = 2017, type = "Vehicles", ask = FALSE)
+casualties_17 = get_stats19(year = 2017, type = "Casualties", ask = FALSE)
+```
+
+```{r}
+# Find out the dimensions of the dataset (number of rows and columns)
+dim(crashes_17)
+dim(vehicles_17)
+dim(casualties_17)
+```
+
+This shows that there are 129,982 crashes involving 238,926 vehicles and 170,993 casualties.  We now need to join the datasets together.  As I am interested in the casualty data, I want to use that as the 'main' data and join everything else to that. I will create a new dataset (`d17`) and then use `left_join` as this takes the other datasets and joins them to the left one (in this case the `casualties_17`) using the shared index (`accident_index`) but maintains any rows in `casualties_17` even if there are no rows from the other dataset that match (in contrast to `inner_join` that removes such rows).  Having joined `crashes_17` to `casualties_17` I then take the product of that using the pipe `%>%` to then `left_join` `vehicles_17` to the product dataset.       
+```{r, message=FALSE, warning=FALSE}
+# Join the other datasets to the casualty dataset using accident index
+d17 = left_join(casualties_17, crashes_17) %>% 
+  left_join(., vehicles_17)
+```
+This gives me a dataset where every row is a casualty but is linked to the details of the crash and vehicle(s) involved.  So by looking at the table we can see that the first three rows are an accident that involved two vehicles and three casualties.  We can also see that there are many variables (70) in this dataset. 
+```{r}
+# Print the first three rows of the dataset
+head(d17, 3)
+```
+We can check the join by ensuring that this dataset contains the same number of rows as the `casualties_17` datset i.e. 170,993 casualties.  
+```{r}
+dim(d17)
+```
+However, these casualties are all over the UK.  I want to focus on London.  The Metropolitan Police Force covers the 32 London Boroughs and the City of London Police covers the City of London.  Limiting crashes to those reported to these police forces seems like a sensible approach to finding crashes in London.  Another approach would have been to use latitude and longitude or local authority area but these would have been more complex.  
+
+```{r}
+# Identify unique values for police force
+unique(d17$police_force)
+```
+This shows that all crashes are coded by police force and that there are no options for missing values. Again, I will create new dataset (`d17_lon`) that contains just the crashes in London.
+
+```{r}
+# Filter on London police forces only
+d17_lon = d17 %>% 
+  filter(police_force == "Metropolitan Police" | police_force == "City of London")
+dim(d17_lon)
+```
+Therefore, 32,547 crashes were reported to London police forces.
+```{r}
+# Identify unique values for casualty type
+unique(d17$casualty_type)
+```
+We can see here that there is an 'NA' category for casualty type.
+```{r}
+d17_lon %>% 
+  count(casualty_type)
+```
+However, looking at our dataset, none of the casualties are coded as 'NA'.  We can see we have 4506 casualties who are cyclists. I will now create a dataset of just Cyclist casualties in London.     
+
+```{r}
+# Filter on cycle casualties
+d17_lon_cyc = d17_lon %>% filter(casualty_type == "Cyclist")
+dim(d17_lon_cyc)
+```
+Again, looking at the new dataset we can see we have 4,506 rows thus confirming we have filtered correctly.  
+
+I was suspicious that the way STATS19 data was recorded meant that cyclists were considered 'drivers' of the vehicle involved in the crash (i.e. the bicycle).  Therefore I performed a scatterplot (a type of chart useful for comparing continuous data) see if the data suggested that was the case (see Figure 1).  
+```{r}
+ggplot(data = d17_lon_cyc) +
+  geom_point(mapping = aes(x = age_of_casualty, y = age_of_driver)) +
+  ggtitle("Figure 1: Age of London cycling casualties by age of driver in 2017")
+```
+
+This high level of correlation suggest that my hypothesis was generally correct i.e. that the driver details refer to the cyclist (driver of the bicycle) rather than the driver of any other vehicles involved in the crash. This is clearly demonstrated by the fact we have 'drivers' under the age of 17.  Therefore, I need to use another method to find the IMD decile of drivers involved in crashes with cyclist casualties.
+
+#### Obtaining the correct IMD deciles for casualty and driver
+I will now take a different approach to combining the data to ensure that the driver details are the driver of the vehicle and not that of the cyclist.  
+
+Firstly, I create new, smaller datasets that only contain the columns that I am interested in. 
+```{r, message=FALSE}
+# Subset the columns of interest in each dataset
+cr = crashes_17 %>% 
+  select(accident_index, police_force)
+ve = vehicles_17 %>% 
+  select(accident_index, vehicle_reference, vehicle_type, age_of_driver, driver_imd_decile)
+ca = casualties_17 %>% 
+  select(accident_index, vehicle_reference, age_of_casualty, casualty_type, casualty_imd_decile)
+```
+Then I limit the crashes to those where the casualty is a cyclist and where the other vehicle involved is a car. 
+```{r}
+# Filter the crashes of interest
+ca_bike = ca %>% filter(casualty_type == "Cyclist") #-> 18321 cyclist casualties 
+ve_car = ve %>% filter(vehicle_type == "Car") # -> 168347 cars involved
+```
+
+I now need to join to the casualty dataset the crash and vehicle dataset.  I want to end up with each observation having the casualty IMD as that of the cyclist casualty and the driver IMD as that of the car driver.  I use an `inner_join` to join the crash details to the cyclist casualty details.  This gives me the correct casualty IMD.  The `inner_join` means that crashes that don't have a cyclist casualty are not joined.   Then the `ve_car` dataset that contains the `driver_imd_decile` for cars is joined to the product of the previous join.  As again this is an `inner_join`, it only joins those cars where the crash involved a cyclist casualty (all other observations of cars involved in crashes with other types of casualties are dropped).  
+```{r}
+# Join the other datasets to the casualty dataset
+d17 = inner_join(ca_bike, cr) %>% 
+  inner_join(., ve_car, by = "accident_index")
+```
+This gives 14,332 casualties who were cyclists involved in crashes with cars.
+```{r}
+# Filter on london only crashes
+d17_lon = d17 %>% 
+  filter(police_force == "Metropolitan Police" | police_force == "City of London")
+```
+
+Therefore, there were 2,813 cyclist casualties from crashes with cars reported to London police forces.
+
+Can I definitely state that the join was correct given that there are multiple issues with the STATS19 data and that it can be challenging to get the 'right' data?  One approach I have identified is to examine to see if there were cases where one accident involved multiple cyclist casualties to ensure that these all the casualties are represented in the dataset.   
+```{r}
+# Create a dataset of the accident indices
+n_occur = data.frame(table(d17_lon$accident_index))
+# Count the frequency
+n_occur %>%
+  group_by(Freq) %>%
+  summarize(count = n())
+```
+This shows that there were 40 crashes where there were two or more cyclist casualties.  
+
+  
+Now, the `d17_lon` dataset should have the correct casualty and driver IMD deciles in each observation row.  I can check to see that the observation data different for casualty and driver by performing scatterplots for their ages.  
+```{r}
+# Perform scatterplot to see if driver details match the casualty details
+ggplot(data = d17_lon) +
+  geom_point(mapping = aes(x = age_of_casualty, y = age_of_driver)) +
+  ggtitle("Figure 2: Revised scatterplot of age of London cycling casualties by age of driver 
+          in 2017")
+```
+
+Figure 2 shows considerable variation in age of driver and age of cyclist which indicates we now have the ages of the car drivers and the pedal cyclist casualties, particularly since none of the drivers are now under the age of 17. However, sometimes it can be hard to understand the data if lots of points overlie each other.  One solution is to use 'jitter' where the points are jittered to make them easier to see.  Another approach is to create a hexbin where the colour of the hex indicates the count represented by that hex (figure 3).
+
+```{r}
+# Perform hexbin plot
+ggplot(data = d17_lon) +
+  geom_hex(mapping = aes(x = age_of_casualty, y = age_of_driver), bins = 40) +
+  scale_fill_gradientn(colours = heat.colors(10)) +
+  ggtitle("Figure 3: Hexbin plot of figure 2 (age of London cycling casualties by age of driver)")
+```
+
+This shows that very few hexes have high counts indicating that whilst there may be overlap of points, points show considerable spread.  Again, this supports that we have obtained the correct driver and casualty data in each observation row. 
+
+#### Data wrangling of IMD for analysis
+I now need to wrangle the IMD data so that I can analyse it.  Firstly I check to see what the categories are within the casualty and driver IMDs.  
+```{r}
+unique(d17_lon$casualty_imd_decile)
+unique(d17_lon$driver_imd_decile)
+```
+I can see that there is a category for "Data missing or out of range".  
+
+I now need to identify the data type of the IMD data.
+
+```{r, message=FALSE}
+# Ensuring IMD is correct data type
+mode(d17_lon$casualty_imd_decile) 
+levels(d17_lon$casualty_imd_decile)
+mode(d17_lon$driver_imd_decile)
+levels(d17_lon$driver_imd_decile)
+```
+Here it is clear that the IMD is currently a 'character' data type but that it has no categories (levels) in it.  Therefore, I will create a list of IMD levels and then apply it to the IMD data using a factor which is how R handles categorical data.  I will use the `forcats` part of the `tidyverse` to do this.  
+```{r}
+# Create a list of the valid IMD levels
+IMD_levels = c(
+    "Most deprived 10%", "More deprived 10-20%", "More deprived 20-30%", "More deprived 30-40%",
+    "More deprived 40-50%", "Less deprived 40-50%", "Less deprived 30-40%", 
+    "Less deprived 20-30%", "Less deprived 10-20%", "Least deprived 10%")
+
+# Create a factor and apply it to the IMD data
+d17_lon$cas_IMD_dec_factor = factor(d17_lon$casualty_imd_decile, levels = IMD_levels)
+d17_lon$driver_IMD_dec_factor = factor(d17_lon$driver_imd_decile, levels = IMD_levels)
+```
+
+#### Visualisation of IMD
+I will now visualise the categorical IMD decile using bar charts (a type of chart that is suitable to looking at counts of categorical data).
+```{r}
+ggplot(data = d17_lon) + 
+  geom_bar(mapping = aes(x = cas_IMD_dec_factor, fill = cas_IMD_dec_factor)) +
+  ggtitle("Figure 4: IMD decile for cycling casualties in London 2017") +
+  theme_bw() +
+  theme(axis.title.x = element_blank(),axis.text.x=element_blank(),
+        axis.ticks.x=element_blank(),legend.text = element_text(size = 8)) +
+  scale_fill_grey(start = 0.1, end = 0.7,na.value = "red", name = "Casualty IMD")
+```
+
+Figure 4 shows that there is a clear socio-economic gradient in the IMD of casualty cyclists with the higher the IMD decile the fewer the number of cyclist casualties with the exception of the most deprived IMD. 
+```{r}
+(sum(is.na(d17_lon$cas_IMD_dec_factor))/2813)*100
+```
+
+However, `r signif(((sum(is.na(d17_lon$cas_IMD_dec_factor))/2813)*100), 3)` percent of casualty IMDs are missing ('NA').  
+
+
+Visualising the driver IMD decile can be done is a similar way (Figure 5).  
+```{r}
+ggplot(data = d17_lon) + 
+  geom_bar(mapping = aes(x = driver_IMD_dec_factor, fill = driver_IMD_dec_factor)) +
+  ggtitle("Figure 5: IMD decile for car drivers involved in collisions where cyclists are
+          casualties in London 2017") +
+  theme_bw() +
+  theme(axis.title.x = element_blank(),axis.text.x=element_blank(),
+        axis.ticks.x=element_blank(),legend.text = element_text(size = 8)) +
+  scale_fill_grey(start = 0.1, end = 0.7,na.value = "red", name = "Car Driver IMD")
+```
+
+Figure 5 shows a similar pattern for the driver's IMD decile.  However there are large number of drivers' for whom we do not have an IMD decile.  
+```{r}
+(sum(is.na(d17_lon$driver_IMD_dec_factor))/2813)*100
+```
+
+In fact, there are `r signif(((sum(is.na(d17_lon$driver_IMD_dec_factor))/2813)*100), 3)` percent of driver IMDs missing. This is a very high percentage and makes it hard to draw conclusions. It is also an interesting finding as given that the police were involved in every crash it seems likely that the full driver details would have been captured.  How is that not then converted in the STATS19 processing to a IMD?  Are some drivers giving details that are incorrect?  With such as high percentage, it would be appropriate to do some analysis of this missing data to try and identify whether they are missing at random or whether there are patterns to the missingness suggesting systematic error.  This could be done by comparing those who have IMD with those that do not and see if there are patterns by police force, geographical location or temporality (e.g. time of day).  
+
+```{r}
+ggplot(data = d17_lon) + 
+  geom_bar(mapping = aes(x = cas_IMD_dec_factor, fill = cas_IMD_dec_factor)) +
+  facet_wrap(~ driver_IMD_dec_factor, nrow = 3, ncol = 5) +
+  ggtitle("Figure 6: A comparison of Car driver IMD decile (each grid) by the IMD decile 
+          of the cyclist casualty (x axes) involved in their crash (London 2017)") +
+  theme_bw() +
+  theme(axis.title.x = element_blank(),axis.text.x=element_blank(),
+        axis.ticks.x=element_blank(),strip.text.x = element_text(size = 6), legend.text = element_text(size = 8)) +
+  scale_fill_grey(start = 0.1, end = 0.7,na.value = "orange", name = "Casualty IMD")
+```
+
+Figure 6 shows the cyclist casualty IMD by driver IMD with each grid representing the driver IMD category.  However, it may be easier to visualise the pattern if we drop the driver NAs and allow the grids to scale to the new values (rather than being scaled by the high count for driver NAs).  
+```{r, warning=FALSE}
+# Count the driver_IMD_decile by category
+d17_lon %>% 
+  count(driver_IMD_dec_factor)
+```
+So there are 1,052 NAs for driver IMD meaning that we only have both casualty and driver IMD for 1,761 cyclist casualties.  We can now filter to include only those where we have an IMD decile.
+```{r}
+# Filter only those where there is a driver_IMD_decile
+d17_lon_driNAexc = filter(d17_lon, driver_IMD_dec_factor != "NA")
+```
+Replotting the data when both IMDs are known and allowing the y axis to scale depending on the data in each grid gives us Figure 7.  
+
+```{r}
+ggplot(data = d17_lon_driNAexc) + 
+  geom_bar(mapping = aes(x = cas_IMD_dec_factor, fill = cas_IMD_dec_factor)) +
+  facet_wrap(~ driver_IMD_dec_factor, nrow = 3, ncol = 5, scales = "free") +
+  ggtitle("Figure 7: Figure 6 replotted with only those drivers where we have an 
+          IMD value and each y axis individually scaled") +
+  theme_bw() +
+  theme(axis.title.x = element_blank(),axis.text.x=element_blank(),
+        axis.ticks.x=element_blank(),strip.text.x = element_text(size = 5), legend.text = element_text(size = 8)) +
+  scale_fill_grey(start = 0.1, end = 0.7,na.value = "blue", name = "Casualty IMD")
+```
+
+
+We can see social gradients in the cyclist casualty IMD in the lower driver IMDs but this pattern is less clear as the driver IMD rises.  This may be related to the small numbers that are involved. Given that the greatest number of casualties and driver involved are from the lower socio-economic groups and that there is a social gradient already in the both casualty and driver IMD, it is not unsurprising that we see the social gradient when comparing absolute numbers of cyclists and drivers.  There is some evidence to suggest that casualty and driver IMD correlate both in lowest and highest IMD deciles (the social gradient slope appears to reverse for the least deprived 0-20%).  This may suggest that the casualties and drivers are having crashes in their local area.  
+
+
+#### Conclusion
+We can see a clear social gradient in the cyclist casualties with people from lower socio-economic status more likely to be cyclist casualties.  We can also see a social gradient in the car drivers involved in accidents with cyclists.  Although the most deprived 10% are less likely to be cyclist casualties or car drivers involved in crashes with cyclists than most of the other deciles.  There are is correlation between the social gradients in the cyclist casualty IMD in the lower driver IMDs but this pattern is less clear as the driver IMD rises and appears to reverse at the highest socio-economic deciles. It may be that this is related cyclists and drivers crashing their local area or in areas similar to the ones they live in.  However, these figures are absolute numbers.  We do not know the underlying population cycling from these different socio-economic backgrounds.  The calculation of a rate would give greater insight into whether there are different risks for different sections of the population.  Other work to analyse the data further could include looking to see if age, geographical location or gender influence this pattern.  
+
+
+### Section 3: Where do cyclists commute by bicycle in London?  
+
+In this section I will examine where cyclists commute from home to work by bicycle in London by Middle Super Output Area.  I will use Census data from 2011 as my data source [^16].
+
+```{r, echo = FALSE}
+library(sf)
+library(tidyverse)
+library(stringr)
+library(stplanr)
+library(snakecase)
+library(tmap) 
+```
+
+#### Obtaining and manipulating the datasets
+In the first instance I will obtain and manipulate MSOA geographical data.  This datafile is very large so I have already downloaded it [^17].  As it is geographical data, I will open it with the `simple features` package.  
+```{r}
+# Import 2011 MSOA geographical data
+MSOA = read_sf("Middle_Layer_Super_Output_Areas_December_2011_Generalised_Clipped_Boundaries_in_England_and_Wales.shp")
+```
+This file contains all the MSOAs for England and Wales so I need to identify and save the 962 London MSOAs.
+```{r}
+# Create an object containing the London Borough names
+matches = c("City of London", "Barking and Dagenham", "Barnet", "Bexley", "Brent", "Bromley", "Camden", 
+            "Croydon", "Ealing", "Enfield", "Greenwich", "Hackney", "Hammersmith and Fulham", "Haringey", 
+            " Harrow", "Havering", "Hillingdon", "Hounslow", "Islington", "Kensington and Chelsea", 
+            "Kingston upon Thames", "Lambeth", "Lewisham", "Merton", "Newham", "Redbridge", 
+            "Richmond upon Thames", "Southwark", "Sutton", "Tower Hamlets", "Waltham Forest", 
+            "Wandsworth", "Westminster")
+
+# Match the MSOA data with the London Boroughs
+Lon_MSOA = MSOA[grepl(paste(matches, collapse = "|"), MSOA$msoa11nm),]
+
+# Check there are 962 MSOAs (962 rows)
+dim(Lon_MSOA)
+
+# Rename MSOA code column as "geo_code"
+colnames(Lon_MSOA)[colnames(Lon_MSOA)=="msoa11cd"] = "geo_code"
+
+# Visualise the dataset
+head(Lon_MSOA, 1)
+```
+I now need to obtain the Census Origin-destination file for 2011.  This contains each unique MSOA origin and destination pair recorded in the Census.  Again, as this datafile is very large, I have already downloaded it [^18].  I unzip it and then read it in as a csv file. 
+```{r}
+# Unzip and import this file 
+unzip("~/Downloads/wu03ew_v2.zip")
+od = read_csv("wu03ew_v2.csv")
+
+# Give better column names
+names(od)[1] = "home"
+names(od)[2] = "work"
+names(od)[3] = "all"
+
+# Create a minimal version of the dataset to use
+OD = od %>% select(c(1,2,3,12))
+
+# Show the dataset variables
+names(OD)
+```
+#### Creating origin-destination datasets
+I will now create a dataset that shows the origin MSOA for the commute.  I do this by taking the OD dataset, grouping it by the origin MSOA and summing by the origin MSOA.  
+```{r}
+# Create new dataset of the Origins
+Origin_zone = OD %>% 
+  group_by(home) %>% 
+  summarize_if(is.numeric, sum) %>% 
+  rename(geo_code = home) %>% 
+  rename(all_origin = all)
+```
+
+I can check that all the origins are in the London MSOAs using the following code.  It identifies that all MSOAs are represented (962 are True).
+
+```{r}
+# Below code verifies that our OD codes are found in MSOA dataset
+summary(Origin_zone$geo_code %in% Lon_MSOA$geo_code)
+```
+
+Next I join the origin data to the London MSOA data by the origin identifier (geo_code).  By using a `left_join` and having the Lon_MSOA dataset on the left, I ensure that only origins in the London MSOAs are included.  
+```{r}
+# Join the origin details to the MSOA details
+zones_joined = left_join(Lon_MSOA, Origin_zone, by = "geo_code")
+
+# Show the dataset variables
+names(zones_joined)
+```
+Next I take the OD dataset again and group by the work (i.e. destination) MSOA.  I then select just the work destination MSOAs and the numbers of people having this as a work destination and join it to the `zones_joined` dataset using an `inner_join`.  This means that only rows with matches are retained.  This new dataset (`OD_zones`) contains the MSOA code and the numbers of people who commuted from (`all_origin`) and to (`all_destination`) this MSOA.  
+```{r}
+OD_zones = OD %>% 
+  group_by(work) %>% 
+  summarize_if(is.numeric, sum) %>% 
+  dplyr::select(geo_code = work, all_dest = all) %>% 
+  inner_join(zones_joined, ., by = "geo_code")
+
+# Show the dataset variables
+names(OD_zones)
+
+# Drop the 1st column (need to do this so geo_code is the first column - required for later)
+OD_zonesFINAL = OD_zones %>% select(-c(objectid))
+
+# Show the dataset variables
+names(OD_zonesFINAL)
+```
+I can now plot maps showing the origin and destination MSOAs for all commuters who live in London in 2011.  These are shown the figure below.  
+```{r}
+# Plot maps
+qtm(OD_zonesFINAL, c("all_origin", "all_dest")) +
+  tm_layout(panel.labels = c("Origin zone", "Destination zone"), legend.title.size = 0.7, 
+            legend.text.size = 0.5, legend.position = c("right","bottom"))
+```
+  
+It is clear that the commuters start from all over London but the vast majority work in just a few Central London MSOAs. 
+
+  
+I can do a similar exercise that plots the origin and destination MSOAs for London residents who commute by bicycle.
+```{r}
+# Delete 'all' column
+OD_bike = OD %>% select(-c(all))
+
+# Create new dataset of the bike origins
+Bike_Origin_zone = OD_bike %>% 
+  group_by(home) %>% 
+  summarize_if(is.numeric, sum) %>% 
+  rename(geo_code = home) %>% 
+  rename(bike_origin = Bicycle)
+
+# Join the origin details to the MSOA details
+bike_zones_joined = left_join(Lon_MSOA, Bike_Origin_zone, by = "geo_code")
+
+# Get destination zone for commuting cyclists and join to origin/MSOA data
+Bike_OD_zones = OD_bike %>% 
+  group_by(work) %>% 
+  summarize_if(is.numeric, sum) %>% 
+  dplyr::select(geo_code = work, bike_dest = Bicycle) %>% 
+  inner_join(bike_zones_joined, ., by = "geo_code")
+
+# # Show the dataset variables
+names(Bike_OD_zones)
+
+# Plot maps bike commuters in the 2011 Census
+qtm(Bike_OD_zones, c("bike_origin", "bike_dest")) +
+  tm_layout(panel.labels = c("Origin zone", "Destination zone"), legend.title.size = 0.7, 
+            legend.text.size = 0.5, legend.position = c("right","bottom"))
+
+```
+```{r, echo = FALSE}
+# Plot all commuters
+qtm(OD_zonesFINAL, c("all_origin", "all_dest")) +
+  tm_layout(panel.labels = c("Origin zone", "Destination zone"), legend.title.size = 0.8, 
+            legend.text.size = 0.6, legend.position = c("right","bottom")) 
+```
+  
+#### Comments
+The top figure shows the cycling commuters origin and destination MSOAs.  This shows that London commuting cyclists tend to originate from south-west and central MSOAs. This is in contrast to all commuters who originate from all over London.  However similarly to all commuters, cycling commuters tend to work in very Central London MSOAs.  This origin data for cycling commuters suggests a geographical distance they are willing to commute into Central London.  However this picture could be complicated by other factors such as the socio-demographic characteristics of commuters or cycling infrastructure from these areas.  Furthermore, the Census is a snapshot in time so has many limitations.  However it is some of the best data we have.   
+
+#### Commuting cyclist desire lines
+Continuing to use the census data, I now want to examine the cycling commuters desire lines from the centroids of the origin MSOAs to the centroids of the destination MSOAs.  
+```{r}
+# Create a column that identifies the percentage OD routes cycled
+OD$pcycle = (OD$Bicycle / OD$all) *100
+
+# Make the first column in the zones 'geometry' (required for od2line to work)
+Bike_OD_zonesFINAL = Bike_OD_zones %>% select(-c(objectid))
+```
+I will now create two datasets, one identifies people who cycle within their MSOA (`OD_intra_bic`) and one for those whose destination MSOA is different to their home MSOA (`OD_inter_bic).
+```{r}
+OD$pcycle = (OD$Bicycle / OD$all) *100
+OD_intra_bic = filter(OD, home == work & pcycle > 0)
+OD_inter_bic = filter(OD, home != work & pcycle > 0)
+dim(OD_intra_bic) #-> 6521 intrazonal across E&W
+dim(OD_inter_bic) #-> 194703 outzonal  across E&W
+```
+We can see that there are 6521 commuter cycling routes within their MSOA whereas 194,703 cyclists cycle between MSOA. However, these are cycling commuting between any MSOA in England and Wales.  Now we can create cycle commuter desire lines using the `od2line` function. This approach is described in 'Geocomputation with R' [^19].
+```{r}
+# Create the bike desire lines
+bike_desire_lines = od2line(OD_inter_bic, Bike_OD_zonesFINAL)
+```
+However, plotting this results in an error...
+```{r, error = TRUE}
+plot(bike_desire_lines)
+```
+It suggests there are some missing values in the data.  
+  
+Scanning through the dataset in R Studio shows there are some geometries missing one or more of the four geometries. Therefore I want to examine how many desire lines have valid geometry.
+```{r}
+# This code creates a table that is populated by whether the geometry is valid or not
+x = st_is_valid(bike_desire_lines$geometry, reason = TRUE)
+unique(x)
+as.data.frame(table(x))
+```
+Here were can see that only 51,104 observations have valid geometry present.  Hence why it can't be plotted.  I then tried various methods to obtain a dataset with valid geometry only so that I could then filter on London MSOAs and plot the desire lines.  Approaches included:
+```{r, error = TRUE}
+# Using merge to copy the x column to the bike_desire_lines so I could then identify the valid ones
+valid_bike_desire_lines = merge(bike_desire_lines, x)
+```
+This exhausted the 'vector memory' and stopped working. I then tried a `join`. 
+```{r, error = TRUE}
+# Using join
+valid_bike_desire_lines = left_join(bike_desire_lines, x)
+```
+Again this resulted in an error due to the reasons being 'characters'.  I tried running it with the validity logical (True/False) but this also resulted in the same error (the reasons were 'logical').  Finally I tried create a new dataset and requested that values that equalled False for valid geometry were omitted but this gave a list of logical answers and did not omit any.
+
+```{r, eval = FALSE}
+Valid_bike_desire_lines = valid_bike_desire_lines %>%
+  na.omit((st_is_valid(bike_desire_lines$geometry)) == FALSE)
+```
+Frustratingly, I ran out of time to try and develop any new approach to this problem.  I think my next step would have been to convert the True/False to a integer.  Failing that I would seek expert help from a Geographer or Transport Data Science expert.  
+
+#### Conclusions
+London commuting cyclists tend to originate from south-west and central MSOAs contrasting with all commuters who originate from all over London.  However, all types of commuters tend to work in very Central London MSOAs.  
+
+There are only certain MSOAs from which many cyclists commute.  This suggests that a certain length or duration of journey is tolerable to cyclists.  However there are many other factors that could influence this and further research into the characteristics of these MSOAs including examining cycling infrastructure and looking at the socio-demographic characteristics would help identify whether the factors are also important.    
+
+
+
+### Final comments
+Hopefully this portfolio of work demonstrates many of the skills and ideas from the module.  It includes reading in data in various ways and from various sources; processing, cleaning and visualising data including the use of interactive maps.  I have managed origin-destination and boundary data but did not succeed in converting these into desire lines.  I have utilised official and crowd-sourced data.  I have identified a number of additional activities that I would do to further expand on my findings in each section.  Furthermore, there are additional techniques and activities that I would like to employ going forward.  These would include examining the best routes for the most frequent desire lines for commuting cyclists using routing software.  I could then map this onto the cycling infrastructure (both TFL and OSM) to see the routes that are likely to be most popular.  
+
+
+### References
+
+[^1]: Transport for London. 2018 cycling.data.tfl.gov.uk. [Online]. [Accessed: 24 April 2019]. Available from: https://cycling.data.tfl.gov.uk
+
+[^2]: OpenStreetMap contributors. 2015 Planet dump. [Online]. [Accessed: 24 April 2019]. Available from: https://planet.openstreetmap.org
+
+[^3]: Padgham, M., Rudis, B., Lovelace, R. & Salmon, M. 2017. osmdata. *Journal of Open Source Software*, **2**(14). doi: 10.21105/joss.00305
+
+[^4]: London Cycle Network. 2019. OpenStreetMap Wiki. [Online]. [Accessed: 24 April 2019]. Available from: https://wiki.openstreetmap.org/w/index.php?title=London_Cycle_Network&oldid=1820123 
+
+[^5]: Transport for London. 2019.  Cycle Superhighways. [Online]. [Accessed: 24 April 2019]. Available from: https://tfl.gov.uk/modes/cycling/routes-and-maps/cycle-superhighways
+
+[^6]: Transport for London. 2019.  Mini-Hollands. [Online]. [Accessed: 24 April 2019]. Available from: https://tfl.gov.uk/travel-information/improvements-and-projects/cycle-mini-hollands
+
+[^7]: Transport for London. 2019. Central London Grid. [Online]. [Accessed: 24 April 2019]. Available from: https://tfl.gov.uk/travel-information/improvements-and-projects/central-london-cycling-grid
+
+[^8]: Transport for London. 2019. Roads. [Online]. [Accessed: 24 April 2019]. Available from: https://tfl.gov.uk/corporate/about-tfl/what-we-do/roads
+
+[^9]: Camden Council. 2019. Open Data Camden. [Online]. [Accessed: 24 April 2019]. Available from: https://opendata.camden.gov.uk/
+
+[^10]: Transport for London. 2018. Cycling action plan - Making London the world's best big city for cycling. [Online]. [Accessed: 24 April 2019]. Available from: http://content.tfl.gov.uk/cycling-action-plan.pdf
+
+[^11]: Department for Transport. 2011. STATS20 - Instructions for the Completion of Road Accident Reports from non-CRASH Sources. [Online]. London: Department for Transport. [Accessed: 8 February 2019]. Available from: https://assets.publishing.service.gov.uk/government/uploads/system/uploads/attachment_data/file/230596/stats20-2011.pdf. 
+
+[^12]: Department for Transport. 2018. Road Safety Data. [Online]. [Accessed: 8 February 2019]. Available from: https://data.gov.uk/dataset/cb7ae6f0-4be6-4935-9277-47e5ce24a11f/road-safety-data. 
+
+[^13]: Lovelace R., Morgan M., Hama L., Padgham M., Ranzolin D., & Sparks A. 2019. stats 19: A package for working with open road crash data. *Journal of Open Source Software*. **4**(33), 1181. doi: 10.21105/joss.01181. 
+
+[^14]: World Health Organisation. 2019. Epidemiology. [Online]. [Accessed: 21 February 2019]. Available from: https://www.who.int/topics/epidemiology/en/. 
+
+[^15]: Ministry of Housing, Communities and Local Government. 2015. English indices of deprivation 2015 [Accessed: 25 April 2019]. Available from: https://www.gov.uk/government/statistics/english-indices-of-deprivation-2015
+
+[^16]: Office for National Statistics. 2019. 2011 Census. [Online]. [Accessed: 4 May 2019].  Available from: https://www.ons.gov.uk/census/2011census  
+
+[^17]: Office for National Statistics. 2016. Middle Layer Supper Output Areas (December 2011) Generalised Clipped Boundaries in England and Wales. *Office of National Statistics*. [Online]. [Accessed: 4 May 2019].  Available from: http://geoportal.statistics.gov.uk/datasets/826dc85fb600440889480f4d9dbb1a24_2
+
+[^18]: Office for National Statistics. 2014. WU03EW_v2 Location of usual residence and place of work by method of travel to work. *UK Data Service Census Support*. [Online]. [Accessed: 4 May 2019].  Available from: http://wicid.ukdataservice.ac.uk/cider/wicid/downloads.php
+
+[^19]: Lovelace, R., Nowosad, J. & Muenchow, J. 2019. *Geocomputation with R*. [Online]. London: CRC Press. [Accessed: 4 May 2019].  Available from: https://geocompr.robinlovelace.net/
