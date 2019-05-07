@@ -61,9 +61,9 @@ Should you wish to run it from a Python file then please download this file:
 
 ## 2. Transport for Data Science.  
 This module introduced Transport Data Science and R.  
-Here is the code for my assignment [code Rmd](/docs/940065422 TDS main report.Rmd).
-And the html of it [html TDS](/docs/940065422_TDS_main_report.html).
-This file contains the code for interactive map versions of the figures in the assignment [Interactive map code] (/docs/940065422 Interactive map code.R). 
+Here is the code for my assignment [code Rmd](/docs/940065422 TDS main report.Rmd)
+And the html of it [html TDS](/docs/940065422_TDS_main_report.html)
+This file contains the code for interactive map versions of the figures in the assignment [Interactive map code] (/docs/940065422 Interactive map code.R)
 
 
 
